@@ -1,6 +1,7 @@
 #libreria para abrir aplicaciones
 import pyautogui
 import subprocess
+import cv2
 #libreria para tener tiempos de espera
 from time import sleep
 #archivo que contiene nuestra clase que identifica y clickea botones
@@ -14,10 +15,20 @@ import pygetwindow as gw
 #en este caso mis capturas tienen un tamaño aproximadamente de 80 * 50, por lo tanto mis desplazamientos para situarme a la mitad
 #son de 40 y 25 como se ve a continuacion en el metodo navToImage()
 
+def resizeImage(image):
+    img = cv2.imread(image)
+    newValues=pyautogui.size()
+    ancho=(img.shape[1]*newValues[0])//newValues[0]
+    alto=(img.shape[0]*newValues[1])//newValues[1]
+    newsize=(ancho, alto)
+    resized_img = cv2.resize(img, newsize)
+    #cv2.imwrite("resized.jpg", resized_img)
+    return resized_img
+
 class Clicker:
     def __init__(self, targetImage, speed):
         #los atributos de la clase son 2 mas una variable de control
-        self.targetImage=targetImage #la imagen de referencia
+        self.targetImage=resizeImage(targetImage) #la imagen de referencia
         self.speed=speed #la velocidad del click
         pyautogui.FAILSAFE=True #una variable que nos posiciona en los pixeles (0,0) en caso de fallos para evitar dar clicks donde no
     def navToImage(self):
@@ -26,7 +37,7 @@ class Clicker:
         #esto tambien utiliza mas cpu, asi que entre mas seguros de que no hay nada que obstruya el boton podemos bajar el condifence
         try:
             
-            position=pyautogui.locateOnScreen(self.targetImage, confidence=.8) #localizamos el boton
+            position=pyautogui.locateOnScreen(self.targetImage, confidence=.9) #localizamos el boton
             pyautogui.moveTo(position[0]+150, position[1]+40, duration=self.speed) #dentro del boton nos desplazamos hacia su centro
             pyautogui.click()#hacemos click en el boton una vez pocisionados
             
